@@ -1033,6 +1033,205 @@ class MatrixCalc {
 }
 
 // ================================================================
+// BIQUADRATIC EQUATION CALCULATOR
+// ================================================================
+class BiquadraticCalc {
+  constructor() { this.init(); }
+
+  init() { this.bindEvents(); }
+
+  getCoeffs() {
+    return {
+      a: parseFloat(document.getElementById('biq-a').value) || 0,
+      b: parseFloat(document.getElementById('biq-b').value) || 0,
+      c: parseFloat(document.getElementById('biq-c').value) || 0,
+    };
+  }
+
+  // Returns array of {re, im} root objects, deduped
+  solve() {
+    const { a, b, c } = this.getCoeffs();
+    const roots = [];
+
+    if (Math.abs(a) < 1e-12) {
+      // Treat as bx² + c = 0
+      if (Math.abs(b) < 1e-12) {
+        if (Math.abs(c) < 1e-12) {
+          this.showMessage('Вырожденный случай: любое x является решением'); return;
+        } else {
+          this.showMessage('Нет решений'); return;
+        }
+      }
+      const t = -c / b;
+      if (Math.abs(t) < 1e-12) {
+        roots.push({ re: 0, im: 0 });
+      } else if (t > 0) {
+        const s = Math.sqrt(t);
+        roots.push({ re: s, im: 0 }, { re: -s, im: 0 });
+      } else {
+        const s = Math.sqrt(-t);
+        roots.push({ re: 0, im: s }, { re: 0, im: -s });
+      }
+      this.showRoots(roots); return;
+    }
+
+    const D = b * b - 4 * a * c;
+
+    if (D >= 0) {
+      const sqrtD = Math.sqrt(D);
+      const t1 = (-b + sqrtD) / (2 * a);
+      const t2 = (-b - sqrtD) / (2 * a);
+      for (const t of [t1, t2]) {
+        if (Math.abs(t) < 1e-10) {
+          roots.push({ re: 0, im: 0 });
+        } else if (t > 0) {
+          const s = Math.sqrt(t);
+          roots.push({ re: s, im: 0 }, { re: -s, im: 0 });
+        } else {
+          const s = Math.sqrt(-t);
+          roots.push({ re: 0, im: s }, { re: 0, im: -s });
+        }
+      }
+    } else {
+      // D < 0: t1,t2 are complex conjugates → 4 complex roots
+      const p = -b / (2 * a);
+      const q = Math.sqrt(-D) / (2 * a); // q > 0
+      const r = Math.sqrt(c / a);        // |t|, guaranteed real since D<0 → ac>0
+      const alpha = Math.sqrt((r + p) / 2);
+      const beta  = Math.sqrt((r - p) / 2);
+      roots.push(
+        { re:  alpha, im:  beta },
+        { re:  alpha, im: -beta },
+        { re: -alpha, im:  beta },
+        { re: -alpha, im: -beta }
+      );
+    }
+
+    // Deduplicate roots (same re and im within tolerance)
+    const unique = [];
+    for (const root of roots) {
+      const dup = unique.some(u =>
+        Math.abs(u.re - root.re) < 1e-9 && Math.abs(u.im - root.im) < 1e-9
+      );
+      if (!dup) unique.push(root);
+    }
+
+    this.showRoots(unique);
+  }
+
+  fmtRoot(root) {
+    const { re, im } = root;
+    const reZero = Math.abs(re) < 1e-9;
+    const imZero = Math.abs(im) < 1e-9;
+    if (imZero) return fmtNum(re);
+    if (reZero) return (im < 0 ? '−' : '') + fmtNum(Math.abs(im)) + 'i';
+    const sign = im < 0 ? ' − ' : ' + ';
+    return fmtNum(re) + sign + fmtNum(Math.abs(im)) + 'i';
+  }
+
+  isComplex(root) {
+    return Math.abs(root.im) > 1e-9;
+  }
+
+  showRoots(roots) {
+    const box = document.getElementById('biq-result-box');
+    document.getElementById('biq-result-label').textContent = 'Корни';
+    const grid = document.getElementById('biq-result-value');
+    grid.className = 'eq-roots-grid';
+    const labels = ['x₁', 'x₂', 'x₃', 'x₄'];
+    grid.innerHTML = roots.map((r, i) => {
+      const complex = this.isComplex(r);
+      return `<div class="eq-root-item">
+        <span class="eq-root-label">${labels[i] || `x${i+1}`} =</span>
+        <span class="${complex ? 'eq-root-complex' : ''}">${esc(this.fmtRoot(r))}</span>
+      </div>`;
+    }).join('');
+    box.classList.remove('hidden');
+  }
+
+  showMessage(msg) {
+    const box = document.getElementById('biq-result-box');
+    document.getElementById('biq-result-label').textContent = 'Результат';
+    document.getElementById('biq-result-value').className = '';
+    document.getElementById('biq-result-value').innerHTML = `<div class="eq-error">${esc(msg)}</div>`;
+    box.classList.remove('hidden');
+  }
+
+  bindEvents() {
+    document.getElementById('biq-solve').addEventListener('click', () => this.solve());
+  }
+
+  activate() {}
+}
+
+// ================================================================
+// LINEAR SYSTEM CALCULATOR (2×2)
+// ================================================================
+class LinearSystemCalc {
+  constructor() { this.init(); }
+
+  init() { this.bindEvents(); }
+
+  getCoeffs() {
+    const g = id => parseFloat(document.getElementById(id).value) || 0;
+    return {
+      A: g('lin-a'), B: g('lin-b'), C: g('lin-c'),
+      D: g('lin-d'), E: g('lin-e'), F: g('lin-f'),
+    };
+  }
+
+  solve() {
+    const { A, B, C, D, E, F } = this.getCoeffs();
+    // System: Ax + By = -C
+    //         Dx + Ey = -F
+    const delta  = A * E - B * D;
+    const deltaX = B * F - C * E;   // (-C)*E - B*(-F) = BF - CE
+    const deltaY = C * D - A * F;   // A*(-F) - (-C)*D = CD - AF
+
+    if (Math.abs(delta) < 1e-12) {
+      if (Math.abs(deltaX) < 1e-12 && Math.abs(deltaY) < 1e-12) {
+        this.showError('Бесконечно много решений (прямые совпадают)');
+      } else {
+        this.showError('Нет решений (прямые параллельны)');
+      }
+      return;
+    }
+
+    const x = deltaX / delta;
+    const y = deltaY / delta;
+    this.showResult(x, y);
+  }
+
+  showResult(x, y) {
+    const box = document.getElementById('lin-result-box');
+    document.getElementById('lin-result-value').innerHTML = `
+      <div class="eq-xy-result">
+        <div class="eq-xy-line">
+          <span class="eq-xy-var">x =</span>
+          <span class="eq-xy-val">${esc(fmtNum(x))}</span>
+        </div>
+        <div class="eq-xy-line">
+          <span class="eq-xy-var">y =</span>
+          <span class="eq-xy-val">${esc(fmtNum(y))}</span>
+        </div>
+      </div>`;
+    box.classList.remove('hidden');
+  }
+
+  showError(msg) {
+    const box = document.getElementById('lin-result-box');
+    document.getElementById('lin-result-value').innerHTML = `<div class="eq-error">${esc(msg)}</div>`;
+    box.classList.remove('hidden');
+  }
+
+  bindEvents() {
+    document.getElementById('lin-solve').addEventListener('click', () => this.solve());
+  }
+
+  activate() {}
+}
+
+// ================================================================
 // HELPER FUNCTIONS
 // ================================================================
 function factorial(n) {
@@ -1089,6 +1288,8 @@ class UIController {
       volume:      new UnitConverter(VOLUME_UNITS, 'vol-from', 'vol-to', 'vol-amount1', 'vol-amount2'),
       length:      new UnitConverter(LENGTH_UNITS, 'len-from', 'len-to', 'len-amount1', 'len-amount2'),
       matrix:      new MatrixCalc(),
+      biquadratic: new BiquadraticCalc(),
+      linear:      new LinearSystemCalc(),
     };
 
     this.bindNavigation();

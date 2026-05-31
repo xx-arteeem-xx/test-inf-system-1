@@ -1066,3 +1066,142 @@ body::before {
   font-size: 0.9rem;
   margin-top: 0.25rem;
 }
+
+/* ============================================================
+   Equation Calculators (Biquadratic, Linear System)
+   ============================================================ */
+.eq-formula {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 1.05rem;
+  color: var(--accent);
+  text-align: center;
+  padding: 0.6rem 1rem;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.04em;
+}
+
+/* Biquadratic — coefficients row */
+.eq-coeffs-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.eq-coeff-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1;
+}
+.eq-coeff-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+.eq-coeff-input {
+  width: 100%;
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--heading);
+  font-size: 1rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  transition: border-color 0.15s;
+}
+.eq-coeff-input:focus { border-color: var(--accent-border); outline: none; }
+
+/* Roots grid (2 columns) */
+.eq-roots-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.eq-root-item {
+  padding: 0.45rem 0.6rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.88rem;
+  color: var(--heading);
+}
+.eq-root-label {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-right: 0.3rem;
+}
+.eq-root-complex { color: var(--accent); }
+.eq-root-note {
+  grid-column: span 2;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+  padding: 0.3rem 0;
+}
+
+/* Linear system — equation rows */
+.eq-system { margin-bottom: 1rem; }
+.eq-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: nowrap;
+}
+.eq-sys-input {
+  width: 56px;
+  padding: 0.45rem 0.35rem;
+  text-align: center;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--heading);
+  font-size: 0.92rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  transition: border-color 0.15s;
+}
+.eq-sys-input:focus { border-color: var(--accent-border); outline: none; }
+.eq-sys-var { font-size: 0.88rem; color: var(--muted); white-space: nowrap; }
+.eq-sys-eq  { font-size: 0.88rem; color: var(--muted); white-space: nowrap; margin-left: auto; }
+
+/* Linear result (x = ..., y = ...) */
+.eq-xy-result { margin-top: 0.4rem; }
+.eq-xy-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.eq-xy-line:last-child { border-bottom: none; }
+.eq-xy-var { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9rem; color: var(--muted); }
+.eq-xy-val { font-family: 'Consolas', 'Courier New', monospace; font-size: 1.4rem; font-weight: 600; color: var(--heading); }
+
+/* Action row (button aligned right) */
+.eq-action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+/* Shared error style */
+.eq-error {
+  color: #ff6b6b;
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+}
+
+/* Mobile tweaks for equations */
+@media (max-width: 420px) {
+  .eq-sys-input { width: 44px; font-size: 0.82rem; }
+  .eq-coeff-input { font-size: 0.9rem; }
+}

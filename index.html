@@ -52,6 +52,14 @@
           <span class="nav-icon">⊠</span><span>Матрицы</span>
         </button>
         <div class="nav-divider"></div>
+        <div class="nav-section-label">Уравнения</div>
+        <button class="nav-item" data-type="biquadratic">
+          <span class="nav-icon">x⁴</span><span>Биквадратное</span>
+        </button>
+        <button class="nav-item" data-type="linear">
+          <span class="nav-icon">xy</span><span>Система 2×2</span>
+        </button>
+        <div class="nav-divider"></div>
         <div class="nav-section-label">Преобразователь</div>
         <button class="nav-item" data-type="currency">
           <span class="nav-icon">₽</span><span>Валюта</span>
@@ -485,6 +493,67 @@
           <div class="result-box hidden" id="mat-result-box">
             <span class="result-label" id="mat-result-label">Результат</span>
             <div id="mat-result-value"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BIQUADRATIC EQUATION CALCULATOR -->
+      <div class="calc-panel hidden" id="panel-biquadratic">
+        <div class="special-calc eq-calc">
+          <h2 class="calc-title">Биквадратное уравнение</h2>
+          <div class="eq-formula">ax⁴ + bx² + c = 0</div>
+          <div class="eq-coeffs-row">
+            <div class="eq-coeff-group">
+              <label class="eq-coeff-label" for="biq-a">a</label>
+              <input type="number" class="eq-coeff-input" id="biq-a" value="1" step="any">
+            </div>
+            <div class="eq-coeff-group">
+              <label class="eq-coeff-label" for="biq-b">b</label>
+              <input type="number" class="eq-coeff-input" id="biq-b" value="-5" step="any">
+            </div>
+            <div class="eq-coeff-group">
+              <label class="eq-coeff-label" for="biq-c">c</label>
+              <input type="number" class="eq-coeff-input" id="biq-c" value="4" step="any">
+            </div>
+          </div>
+          <div class="eq-action-row">
+            <button class="mat-calc-btn" id="biq-solve">Решить</button>
+          </div>
+          <div class="result-box hidden" id="biq-result-box">
+            <span class="result-label" id="biq-result-label">Корни</span>
+            <div id="biq-result-value"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINEAR SYSTEM CALCULATOR -->
+      <div class="calc-panel hidden" id="panel-linear">
+        <div class="special-calc eq-calc">
+          <h2 class="calc-title">Система линейных уравнений</h2>
+          <div class="eq-system">
+            <div class="eq-line">
+              <input type="number" class="eq-sys-input" id="lin-a" value="1" step="any">
+              <span class="eq-sys-var">x +</span>
+              <input type="number" class="eq-sys-input" id="lin-b" value="1" step="any">
+              <span class="eq-sys-var">y +</span>
+              <input type="number" class="eq-sys-input" id="lin-c" value="-3" step="any">
+              <span class="eq-sys-eq">= 0</span>
+            </div>
+            <div class="eq-line">
+              <input type="number" class="eq-sys-input" id="lin-d" value="2" step="any">
+              <span class="eq-sys-var">x +</span>
+              <input type="number" class="eq-sys-input" id="lin-e" value="-1" step="any">
+              <span class="eq-sys-var">y +</span>
+              <input type="number" class="eq-sys-input" id="lin-f" value="0" step="any">
+              <span class="eq-sys-eq">= 0</span>
+            </div>
+          </div>
+          <div class="eq-action-row">
+            <button class="mat-calc-btn" id="lin-solve">Решить</button>
+          </div>
+          <div class="result-box hidden" id="lin-result-box">
+            <span class="result-label">Решение</span>
+            <div id="lin-result-value"></div>
           </div>
         </div>
       </div>
