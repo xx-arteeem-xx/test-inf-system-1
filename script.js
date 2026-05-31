@@ -793,6 +793,246 @@ const LENGTH_UNITS = {
 };
 
 // ================================================================
+// MATRIX MATH HELPERS
+// ================================================================
+function matMinor(m, row, col) {
+  return m.filter((_, r) => r !== row).map(r => r.filter((_, c) => c !== col));
+}
+function matDet(m) {
+  const n = m.length;
+  if (n === 1) return m[0][0];
+  if (n === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+  let d = 0;
+  for (let c = 0; c < n; c++) d += (c % 2 === 0 ? 1 : -1) * m[0][c] * matDet(matMinor(m, 0, c));
+  return d;
+}
+function matTranspose(m) { return m[0].map((_, c) => m.map(row => row[c])); }
+function matInverse(m) {
+  const n = m.length;
+  const aug = m.map((row, i) => { const id = Array(n).fill(0); id[i] = 1; return [...row, ...id]; });
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(aug[r][col]) > Math.abs(aug[maxRow][col])) maxRow = r;
+    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+    const pivot = aug[col][col];
+    if (Math.abs(pivot) < 1e-10) return null;
+    for (let j = 0; j < 2 * n; j++) aug[col][j] /= pivot;
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const f = aug[r][col];
+      for (let j = 0; j < 2 * n; j++) aug[r][j] -= f * aug[col][j];
+    }
+  }
+  return aug.map(row => row.slice(n));
+}
+function matRank(m) {
+  const mat = m.map(row => row.slice()), rows = mat.length, cols = mat[0].length;
+  let rank = 0, rowIdx = 0;
+  for (let col = 0; col < cols && rowIdx < rows; col++) {
+    let maxRow = rowIdx;
+    for (let r = rowIdx + 1; r < rows; r++) if (Math.abs(mat[r][col]) > Math.abs(mat[maxRow][col])) maxRow = r;
+    if (Math.abs(mat[maxRow][col]) < 1e-10) continue;
+    [mat[rowIdx], mat[maxRow]] = [mat[maxRow], mat[rowIdx]];
+    const pivot = mat[rowIdx][col];
+    for (let j = col; j < cols; j++) mat[rowIdx][j] /= pivot;
+    for (let r = 0; r < rows; r++) {
+      if (r === rowIdx) continue;
+      const f = mat[r][col];
+      for (let j = col; j < cols; j++) mat[r][j] -= f * mat[rowIdx][j];
+    }
+    rank++; rowIdx++;
+  }
+  return rank;
+}
+function matAdd(a, b) { return a.map((row, i) => row.map((v, j) => v + b[i][j])); }
+function matSub(a, b) { return a.map((row, i) => row.map((v, j) => v - b[i][j])); }
+function matMul(a, b) {
+  return Array.from({ length: a.length }, (_, i) =>
+    Array.from({ length: b[0].length }, (_, j) =>
+      a[i].reduce((s, _, k) => s + a[i][k] * b[k][j], 0)
+    )
+  );
+}
+function matSolve(a, b) {
+  const n = a.length, bCols = b[0].length;
+  const aug = a.map((row, i) => [...row, ...b[i]]);
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(aug[r][col]) > Math.abs(aug[maxRow][col])) maxRow = r;
+    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+    const pivot = aug[col][col];
+    if (Math.abs(pivot) < 1e-10) return null;
+    for (let j = 0; j < n + bCols; j++) aug[col][j] /= pivot;
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const f = aug[r][col];
+      for (let j = 0; j < n + bCols; j++) aug[r][j] -= f * aug[col][j];
+    }
+  }
+  return aug.map(row => row.slice(n));
+}
+function fmtNum(n) {
+  if (!isFinite(n)) return isNaN(n) ? 'NaN' : (n > 0 ? '∞' : '-∞');
+  if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+  return parseFloat(n.toFixed(4)).toString();
+}
+
+// ================================================================
+// MATRIX CALCULATOR
+// ================================================================
+class MatrixCalc {
+  constructor() {
+    this.showB = false;
+    this.rowsA = 3; this.colsA = 3;
+    this.rowsB = 3; this.colsB = 3;
+    this.init();
+  }
+
+  init() {
+    this.buildGrid('a');
+    this.buildGrid('b');
+    this.bindEvents();
+    this.updateOperationList();
+  }
+
+  buildGrid(which) {
+    const rows = which === 'a' ? this.rowsA : this.rowsB;
+    const cols = which === 'a' ? this.colsA : this.colsB;
+    const grid = document.getElementById(`mat-${which}-grid`);
+    grid.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
+    grid.innerHTML = '';
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.inputMode = 'decimal';
+        inp.className = 'matrix-cell';
+        inp.value = '0';
+        inp.dataset.r = r;
+        inp.dataset.c = c;
+        grid.appendChild(inp);
+      }
+    }
+  }
+
+  getMatrix(which) {
+    const rows = which === 'a' ? this.rowsA : this.rowsB;
+    const cols = which === 'a' ? this.colsA : this.colsB;
+    const grid = document.getElementById(`mat-${which}-grid`);
+    const m = Array.from({ length: rows }, () => Array(cols).fill(0));
+    grid.querySelectorAll('.matrix-cell').forEach(inp => {
+      m[parseInt(inp.dataset.r)][parseInt(inp.dataset.c)] = parseFloat(inp.value) || 0;
+    });
+    return m;
+  }
+
+  updateOperationList() {
+    const sel = document.getElementById('mat-operation');
+    const ops = this.showB
+      ? [['add', 'A + B'], ['subtract', 'A − B'], ['multiply', 'A × B'], ['solve', 'AX = B']]
+      : [['det', 'Определитель det(A)'], ['transpose', 'Транспонирование Aᵀ'], ['inverse', 'Обратная A⁻¹'], ['rank', 'Ранг rank(A)']];
+    sel.innerHTML = ops.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  }
+
+  calculate() {
+    const op = document.getElementById('mat-operation').value;
+    const A = this.getMatrix('a');
+    try {
+      if (!this.showB) {
+        if (['det', 'inverse', 'rank'].includes(op) && A[0].length !== A.length) {
+          this.showError('Матрица должна быть квадратной'); return;
+        }
+        switch (op) {
+          case 'det':       this.showScalar('det(A)', fmtNum(matDet(A))); break;
+          case 'transpose': this.showMatrix('Aᵀ', matTranspose(A)); break;
+          case 'inverse': {
+            const inv = matInverse(A);
+            if (!inv) { this.showError('Матрица вырождена (det = 0)'); return; }
+            this.showMatrix('A⁻¹', inv); break;
+          }
+          case 'rank': this.showScalar('rank(A)', String(matRank(A))); break;
+        }
+      } else {
+        const B = this.getMatrix('b');
+        switch (op) {
+          case 'add':
+          case 'subtract':
+            if (A.length !== B.length || A[0].length !== B[0].length) {
+              this.showError('Матрицы должны быть одного размера'); return;
+            }
+            this.showMatrix(op === 'add' ? 'A + B' : 'A − B', op === 'add' ? matAdd(A, B) : matSub(A, B));
+            break;
+          case 'multiply':
+            if (A[0].length !== B.length) {
+              this.showError('Число столбцов A должно равняться числу строк B'); return;
+            }
+            this.showMatrix('A × B', matMul(A, B)); break;
+          case 'solve':
+            if (A.length !== A[0].length) { this.showError('Матрица A должна быть квадратной'); return; }
+            if (A.length !== B.length) { this.showError('Число строк A должно равняться числу строк B'); return; }
+            { const X = matSolve(A, B); if (!X) { this.showError('Система не имеет единственного решения'); return; } this.showMatrix('X', X); }
+            break;
+        }
+      }
+    } catch { this.showError('Ошибка вычисления'); }
+  }
+
+  showScalar(label, value) {
+    document.getElementById('mat-result-label').textContent = label;
+    document.getElementById('mat-result-value').innerHTML = `<div class="mat-result-scalar">${esc(String(value))}</div>`;
+    document.getElementById('mat-result-box').classList.remove('hidden');
+  }
+
+  showMatrix(label, matrix) {
+    const cols = matrix[0].length;
+    const grid = document.createElement('div');
+    grid.className = 'mat-result-grid';
+    grid.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+    matrix.forEach(row => row.forEach(v => {
+      const cell = document.createElement('div');
+      cell.className = 'mat-result-cell';
+      cell.textContent = fmtNum(v);
+      grid.appendChild(cell);
+    }));
+    document.getElementById('mat-result-label').textContent = label;
+    const valEl = document.getElementById('mat-result-value');
+    valEl.innerHTML = '';
+    valEl.appendChild(grid);
+    document.getElementById('mat-result-box').classList.remove('hidden');
+  }
+
+  showError(msg) {
+    document.getElementById('mat-result-label').textContent = 'Ошибка';
+    document.getElementById('mat-result-value').innerHTML = `<div class="mat-result-error">${esc(msg)}</div>`;
+    document.getElementById('mat-result-box').classList.remove('hidden');
+  }
+
+  bindEvents() {
+    document.getElementById('mat-mode-a').addEventListener('click', () => {
+      this.showB = false;
+      document.getElementById('mat-mode-a').classList.add('active');
+      document.getElementById('mat-mode-ab').classList.remove('active');
+      document.getElementById('mat-b-section').classList.add('hidden');
+      this.updateOperationList();
+    });
+    document.getElementById('mat-mode-ab').addEventListener('click', () => {
+      this.showB = true;
+      document.getElementById('mat-mode-ab').classList.add('active');
+      document.getElementById('mat-mode-a').classList.remove('active');
+      document.getElementById('mat-b-section').classList.remove('hidden');
+      this.updateOperationList();
+    });
+    document.getElementById('mat-a-rows').addEventListener('change', e => { this.rowsA = parseInt(e.target.value); this.buildGrid('a'); });
+    document.getElementById('mat-a-cols').addEventListener('change', e => { this.colsA = parseInt(e.target.value); this.buildGrid('a'); });
+    document.getElementById('mat-b-rows').addEventListener('change', e => { this.rowsB = parseInt(e.target.value); this.buildGrid('b'); });
+    document.getElementById('mat-b-cols').addEventListener('change', e => { this.colsB = parseInt(e.target.value); this.buildGrid('b'); });
+    document.getElementById('mat-calculate').addEventListener('click', () => this.calculate());
+  }
+
+  activate() {}
+}
+
+// ================================================================
 // HELPER FUNCTIONS
 // ================================================================
 function factorial(n) {
@@ -848,6 +1088,7 @@ class UIController {
       currency:    new CurrencyCalc(),
       volume:      new UnitConverter(VOLUME_UNITS, 'vol-from', 'vol-to', 'vol-amount1', 'vol-amount2'),
       length:      new UnitConverter(LENGTH_UNITS, 'len-from', 'len-to', 'len-amount1', 'len-amount2'),
+      matrix:      new MatrixCalc(),
     };
 
     this.bindNavigation();

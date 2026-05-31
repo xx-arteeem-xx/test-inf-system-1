@@ -48,6 +48,9 @@
         <button class="nav-item" data-type="date">
           <span class="nav-icon">📅</span><span>Вычисление даты</span>
         </button>
+        <button class="nav-item" data-type="matrix">
+          <span class="nav-icon">⊠</span><span>Матрицы</span>
+        </button>
         <div class="nav-divider"></div>
         <div class="nav-section-label">Преобразователь</div>
         <button class="nav-item" data-type="currency">
@@ -400,6 +403,88 @@
               <input type="number" class="conv-amount" id="len-amount2" value="0" step="any">
               <select class="conv-select" id="len-to"></select>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATRIX CALCULATOR -->
+      <div class="calc-panel hidden" id="panel-matrix">
+        <div class="special-calc matrix-calc">
+          <h2 class="calc-title">Матрицы</h2>
+
+          <div class="matrix-ab-toggle">
+            <button class="mat-mode-btn active" id="mat-mode-a">Матрица A</button>
+            <button class="mat-mode-btn" id="mat-mode-ab">+ Матрица B</button>
+          </div>
+
+          <!-- Matrix A -->
+          <div class="matrix-section">
+            <div class="matrix-sec-header">
+              <span class="matrix-label">Матрица A</span>
+              <div class="matrix-size-row">
+                <select id="mat-a-rows" class="mat-size-sel">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+                <span>×</span>
+                <select id="mat-a-cols" class="mat-size-sel">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </div>
+            </div>
+            <div class="matrix-grid-wrap">
+              <div class="matrix-grid" id="mat-a-grid"></div>
+            </div>
+          </div>
+
+          <!-- Matrix B (hidden by default) -->
+          <div class="matrix-section hidden" id="mat-b-section">
+            <div class="matrix-sec-header">
+              <span class="matrix-label">Матрица B</span>
+              <div class="matrix-size-row">
+                <select id="mat-b-rows" class="mat-size-sel">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+                <span>×</span>
+                <select id="mat-b-cols" class="mat-size-sel">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </div>
+            </div>
+            <div class="matrix-grid-wrap">
+              <div class="matrix-grid" id="mat-b-grid"></div>
+            </div>
+          </div>
+
+          <!-- Operation + Button -->
+          <div class="matrix-action-row">
+            <select class="calc-select mat-op-sel" id="mat-operation"></select>
+            <button class="mat-calc-btn" id="mat-calculate">Вычислить</button>
+          </div>
+
+          <!-- Result -->
+          <div class="result-box hidden" id="mat-result-box">
+            <span class="result-label" id="mat-result-label">Результат</span>
+            <div id="mat-result-value"></div>
           </div>
         </div>
       </div>

@@ -914,3 +914,155 @@ body::before {
 .calc-panel:not(.hidden) {
   animation: fadeIn 0.15s ease;
 }
+
+/* ============================================================
+   Matrix Calculator
+   ============================================================ */
+#panel-matrix { max-width: 480px; }
+
+.matrix-ab-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.mat-mode-btn {
+  padding: 0.3rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.mat-mode-btn.active {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.matrix-section { margin-bottom: 0.75rem; }
+
+.matrix-sec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.matrix-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.matrix-size-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.mat-size-sel {
+  width: 48px;
+  padding: 0.25rem 0.3rem;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.82rem;
+  appearance: none;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+.mat-size-sel:focus { border-color: var(--accent-border); }
+.mat-size-sel option { background: var(--surface-solid); }
+
+.matrix-grid-wrap {
+  overflow-x: auto;
+  margin-bottom: 0.25rem;
+}
+
+.matrix-grid {
+  display: inline-grid;
+  gap: 4px;
+}
+
+.matrix-cell {
+  width: 44px;
+  height: 36px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--heading);
+  text-align: center;
+  font-size: 0.88rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  transition: border-color 0.15s;
+}
+.matrix-cell:focus { border-color: var(--accent-border); outline: none; }
+
+.matrix-action-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.mat-op-sel { flex: 1; }
+
+.mat-calc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.1rem;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mat-calc-btn:hover {
+  background: rgba(80, 200, 255, 0.22);
+  border-color: rgba(80, 200, 255, 0.50);
+}
+
+.mat-result-grid {
+  display: inline-grid;
+  gap: 4px;
+  margin-top: 0.5rem;
+}
+
+.mat-result-cell {
+  min-width: 52px;
+  padding: 4px 8px;
+  text-align: center;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--heading);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.mat-result-scalar {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--heading);
+  margin-top: 0.25rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.mat-result-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
